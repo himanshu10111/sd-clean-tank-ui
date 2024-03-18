@@ -1,25 +1,56 @@
-import React, { useState } from 'react';
-import { Stack, Typography, TextField, Grid, Paper } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Stack, Typography, TextField, Grid, Paper, Button, Snackbar } from '@mui/material';
 import Title from './Title';
 
 const SelectTimeSlot = () => {
   const [selectedDate, setSelectedDate] = useState('');
-  const [availableSlots, setAvailableSlots] = useState([]);
+  const [slotsAvailable, setSlotsAvailable] = useState(null);
+  const [showError, setShowError] = useState(false);
+
+  // Get today's date in YYYY-MM-DD format
+  const today = new Date().toISOString().split('T')[0];
+
+  useEffect(() => {
+    if (selectedDate) {
+      if (selectedDate >= today) {
+        fetchAvailableSlots(selectedDate);
+      } else {
+        setShowError(true);
+        // Clear the selected date
+        setSelectedDate('');
+        // After 3 seconds, hide the error message
+        setTimeout(() => {
+          setShowError(false);
+        }, 3000);
+      }
+    }
+  }, [selectedDate, today]);
 
   const handleDateChange = (event) => {
     setSelectedDate(event.target.value);
-    fetchAvailableSlots(event.target.value);
   };
+
   const fetchAvailableSlots = (date) => {
-    const predefinedSlots = [
-      '10:00 AM',
-      '11:00 AM',
-      '12:00 PM',
-      '1:00 PM',
-      '2:00 PM',
-    ];
-    setAvailableSlots(predefinedSlots);
+    fetch(`http://localhost:8000/api/available-slots/${date}`)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(data => {
+        setSlotsAvailable(data.slotsAvailable);
+      })
+      .catch(error => {
+        console.error('Error fetching available slots:', error);
+        setSlotsAvailable(null);
+      });
   };
+
+  // Button styling based on availability
+  const buttonStyle = slotsAvailable > 0
+    ? { backgroundColor: 'green', color: 'white', margin: '10px' }
+    : { backgroundColor: 'black', color: 'white', margin: '10px' };
 
   return (
     <Stack
@@ -34,6 +65,12 @@ const SelectTimeSlot = () => {
         backgroundColor: 'orange',
       }}
     >
+      <Snackbar
+        open={showError}
+        message="Please select a current or future date."
+        autoHideDuration={3000}
+        onClose={() => setShowError(false)}
+      />
       <Title
         text='Slot Booking'
         textAlign='center'
@@ -48,24 +85,32 @@ const SelectTimeSlot = () => {
               InputLabelProps={{ shrink: true }}
               onChange={handleDateChange}
               sx={{ mb: 2, width: '50%' }}
+              inputProps={{ min: today }}
             />
-          </Stack>
+         
+         </Stack>
         </Grid>
         <Grid item xs={6}>
-          <Stack direction="column" alignItems="center">
+          <Stack direction="column" alignItems='center'>
             <Typography variant="h6">Available Slots:</Typography>
-            {availableSlots.length > 0 ? (
-              availableSlots.map((slot, index) => (
-                <Typography key={index} variant="body1">{slot}</Typography>
-              ))
-            ) : (
-              <Typography variant="body1">No slots available for selected date.</Typography>
-            )}
+            <Button
+              variant="contained"
+              style={buttonStyle}
+              disabled={slotsAvailable === null || slotsAvailable <= 0}
+              onClick={() => {
+                // Placeholder for onClick - perhaps opening a booking dialog or another page
+              }}
+            >
+              {slotsAvailable === null
+                ? 'Loading...'
+                : slotsAvailable > 0
+                  ? `${slotsAvailable} Slots Available`
+                  : 'No Slots Available'}
+            </Button>
           </Stack>
         </Grid>
       </Grid>
     </Stack>
   );
 };
-
 export default SelectTimeSlot;

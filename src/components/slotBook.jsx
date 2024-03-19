@@ -1,11 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Stack, Typography, TextField, Grid, Paper, Button, Snackbar } from '@mui/material';
 import Title from './Title';
+import { useNavigate } from 'react-router-dom';
+import book from '../pages/Book'
+
+
 
 const SelectTimeSlot = () => {
   const [selectedDate, setSelectedDate] = useState('');
   const [slotsAvailable, setSlotsAvailable] = useState(null);
   const [showError, setShowError] = useState(false);
+  const navigate = useNavigate();
+
 
   // Get today's date in YYYY-MM-DD format
   const today = new Date().toISOString().split('T')[0];
@@ -87,8 +93,8 @@ const SelectTimeSlot = () => {
               sx={{ mb: 2, width: '50%' }}
               inputProps={{ min: today }}
             />
-         
-         </Stack>
+
+          </Stack>
         </Grid>
         <Grid item xs={6}>
           <Stack direction="column" alignItems='center'>
@@ -97,9 +103,7 @@ const SelectTimeSlot = () => {
               variant="contained"
               style={buttonStyle}
               disabled={slotsAvailable === null || slotsAvailable <= 0}
-              onClick={() => {
-                // Placeholder for onClick - perhaps opening a booking dialog or another page
-              }}
+              onClick={() => navigate('book')} 
             >
               {slotsAvailable === null
                 ? 'Loading...'
@@ -107,6 +111,7 @@ const SelectTimeSlot = () => {
                   ? `${slotsAvailable} Slots Available`
                   : 'No Slots Available'}
             </Button>
+
           </Stack>
         </Grid>
       </Grid>

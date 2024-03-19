@@ -8,6 +8,7 @@ import Contact from './pages/Contact';
 //componentes
 import Navbar from './components/Navbar';
 import Footer from './components/Footer/Footer';
+import Book from './components/bookpage'
 
 function App() {
   return (
@@ -18,6 +19,10 @@ function App() {
           <Route path='/' element={<Home />} />
           <Route path='/about' element={<About />} />
           <Route path='/contact' element={<Contact />} />
+          <Route path='/book' element={<Book/>} />
+
+    
+
         </Routes>
       </BrowserRouter>
       <Footer />

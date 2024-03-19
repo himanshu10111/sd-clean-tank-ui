@@ -13,7 +13,6 @@ const SelectTimeSlot = () => {
   const navigate = useNavigate();
 
 
-  // Get today's date in YYYY-MM-DD format
   const today = new Date().toISOString().split('T')[0];
 
   useEffect(() => {
@@ -22,9 +21,7 @@ const SelectTimeSlot = () => {
         fetchAvailableSlots(selectedDate);
       } else {
         setShowError(true);
-        // Clear the selected date
         setSelectedDate('');
-        // After 3 seconds, hide the error message
         setTimeout(() => {
           setShowError(false);
         }, 3000);
@@ -53,7 +50,6 @@ const SelectTimeSlot = () => {
       });
   };
 
-  // Button styling based on availability
   const buttonStyle = slotsAvailable > 0
     ? { backgroundColor: 'green', color: 'white', margin: '10px' }
     : { backgroundColor: 'black', color: 'white', margin: '10px' };
@@ -103,7 +99,7 @@ const SelectTimeSlot = () => {
               variant="contained"
               style={buttonStyle}
               disabled={slotsAvailable === null || slotsAvailable <= 0}
-              onClick={() => navigate('book')} 
+              onClick={() => navigate(`/book?date=${selectedDate}`)}
             >
               {slotsAvailable === null
                 ? 'Loading...'
@@ -111,6 +107,7 @@ const SelectTimeSlot = () => {
                   ? `${slotsAvailable} Slots Available`
                   : 'No Slots Available'}
             </Button>
+
 
           </Stack>
         </Grid>

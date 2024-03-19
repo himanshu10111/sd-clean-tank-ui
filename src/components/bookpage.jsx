@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useLocation } from 'react-router-dom';
+
 import {
   Table,
   TableBody,
@@ -22,10 +24,15 @@ import {
 
 
 const PriceList = () => {
-  const [selectedValue, setSelectedValue] = useState('');
-  const [open, setOpen] = useState(false); 
-  const [alertOpen, setAlertOpen] = useState(false); // Define the state for alert visibility
 
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const selectedDate = searchParams.get('date');
+  const [selectedValue, setSelectedValue] = useState('');
+  const [open, setOpen] = useState(false);
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [responseMessage, setResponseMessage] = useState('');
+  const [responseOpen, setResponseOpen] = useState(false); 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [mobileNo, setMobileNo] = useState('');
@@ -38,7 +45,7 @@ const PriceList = () => {
     if (selectedValue) {
       setOpen(true);
     } else {
-      setAlertOpen(true); // Show the alert when no selection is made
+      setAlertOpen(true);
     }
   };
 
@@ -47,12 +54,40 @@ const PriceList = () => {
   };
 
   const handleSubmit = () => {
-    console.log({ name, email, mobileNo });
-    setOpen(false);
+    const payload = {
+      username: name,
+      contactNumber: mobileNo,
+      email: email,
+      bookingDate: selectedDate,
+      tankSize: selectedValue // Ensure this matches the expected format
+    };
+
+    fetch('http://localhost:8000/api/book-slot', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    })
+    .then(response => response.json())
+    .then(data => {
+      setResponseMessage(data.message);
+      setResponseOpen(true);
+      setOpen(false); 
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      setResponseMessage('Failed to book slot. Please try again later.');
+      setResponseOpen(true);
+    });
   };
 
-  const handleCloseAlert = () => { // Define the function to close the alert
+  const handleCloseAlert = () => { 
     setAlertOpen(false);
+  };
+
+  const handleCloseResponse = () => {
+    setResponseOpen(false);
   };
   const rows = [
     { id: '10000', tankSize: '10,000 Lit', price: '1,000' },
@@ -181,10 +216,10 @@ const PriceList = () => {
         </DialogActions>
       </Dialog>
       <Snackbar
-        open={alertOpen}
-        autoHideDuration={6000}
-        onClose={handleCloseAlert}
-        message="Please select a tank size before proceeding."
+         open={responseOpen}
+         autoHideDuration={6000}
+         onClose={handleCloseResponse}
+         message={responseMessage}
       />
     </Box>
   );

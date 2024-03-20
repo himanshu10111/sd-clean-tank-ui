@@ -1,42 +1,41 @@
 import React, { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
+
 import {
-  Box, Button, Dialog, DialogActions, DialogContent, DialogTitle,
-  FormControl, FormControlLabel, FormLabel, Paper, Radio, RadioGroup,
-  Snackbar, Table, TableBody, TableCell, TableContainer, TableHead,
-  TableRow, TextField, Typography, Alert,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Radio,
+  Paper,
+  Typography,
+  Box,
+  FormControlLabel,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  TextField,
+  DialogActions,
+  Snackbar
 } from '@mui/material';
+
+
 const PriceList = () => {
 
   const location = useLocation();
-  const navigate = useNavigate(); // useNavigate hook for redirection
-
   const searchParams = new URLSearchParams(location.search);
   const selectedDate = searchParams.get('date');
   const [selectedValue, setSelectedValue] = useState('');
   const [open, setOpen] = useState(false);
   const [alertOpen, setAlertOpen] = useState(false);
   const [responseMessage, setResponseMessage] = useState('');
-  const [responseOpen, setResponseOpen] = useState(false);
+  const [responseOpen, setResponseOpen] = useState(false); 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [mobileNo, setMobileNo] = useState('');
-  const [paymentOption, setPaymentOption] = useState('payLater');
-  const [paymentDisabled, setPaymentDisabled] = useState(false);
-  const [comingSoonOpen, setComingSoonOpen] = useState(false);
-  const [submitSuccess, setSubmitSuccess] = useState(false);
-  const [formError, setFormError] = useState(false);
-
-
-  const validateEmail = (email) => {
-    return email.match(
-      /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-    );
-  };
-
-  const isFormValid = () => {
-    return name && email && mobileNo && selectedValue && selectedDate; // Add more validation as needed
-  };
 
   const handleChange = (event) => {
     setSelectedValue(event.target.value);
@@ -49,43 +48,19 @@ const PriceList = () => {
       setAlertOpen(true);
     }
   };
-  const handlePaymentChange = (event) => {
-    if (event.target.value === 'payNow') {
-      setPaymentDisabled(true);
-      setComingSoonOpen(true);
-    } else {
-      setPaymentOption(event.target.value);
-      setPaymentDisabled(false);
-    }
-  };
-
-  const handleCloseComingSoon = () => {
-    setComingSoonOpen(false);
-    setPaymentDisabled(false);
-  };
 
   const handleClose = () => {
     setOpen(false);
   };
 
   const handleSubmit = () => {
-    if (!isFormValid()) {
-      setFormError(true);
-      setResponseMessage('Please fill in all required fields with valid data.');
-      setResponseOpen(true);
-      return;
-    }
-    setFormError(false);
-
     const payload = {
       username: name,
       contactNumber: mobileNo,
       email: email,
       bookingDate: selectedDate,
-      tankSize: selectedValue,
-      paymentOption: paymentOption,
+      tankSize: selectedValue // Ensure this matches the expected format
     };
-
 
     fetch('http://localhost:8000/api/book-slot', {
       method: 'POST',
@@ -94,24 +69,20 @@ const PriceList = () => {
       },
       body: JSON.stringify(payload),
     })
-      .then(response => {
-        if (!response.ok) throw new Error(response.statusText);
-        return response.json();
-      })
-      .then(data => {
-        setResponseMessage(data.message || 'Entry submitted successfully!');
-        setSubmitSuccess(true); // Indicate success
-        setResponseOpen(true);
-        setTimeout(() => navigate('/'), 2000); // Redirect after showing success message
-      })
-      .catch(error => {
-        console.error('Error:', error);
-        setResponseMessage(error.message || 'Failed to book slot. Please try again later.');
-        setSubmitSuccess(false); // Indicate failure
-        setResponseOpen(true);
-      });
+    .then(response => response.json())
+    .then(data => {
+      setResponseMessage(data.message);
+      setResponseOpen(true);
+      setOpen(false); 
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      setResponseMessage('Failed to book slot. Please try again later.');
+      setResponseOpen(true);
+    });
   };
-  const handleCloseAlert = () => {
+
+  const handleCloseAlert = () => { 
     setAlertOpen(false);
   };
 
@@ -204,7 +175,6 @@ const PriceList = () => {
 
 
       {/* Pop-up Dialog Form */}
-
       <Dialog open={open} onClose={handleClose}>
         <DialogTitle>Fill in Your Details</DialogTitle>
         <DialogContent>
@@ -239,47 +209,18 @@ const PriceList = () => {
             value={mobileNo}
             onChange={(e) => setMobileNo(e.target.value)}
           />
-          <FormControl component="fieldset" margin="normal">
-            <FormLabel component="legend">Payment Option</FormLabel>
-            <RadioGroup
-              row
-              aria-label="payment-option"
-              name="paymentOption"
-              value={paymentOption}
-              onChange={handlePaymentChange}
-            >
-              <FormControlLabel value="payNow" control={<Radio />} label="Pay Now" />
-              <FormControlLabel value="payLater" control={<Radio />} label="Pay On Service" />
-            </RadioGroup>
-          </FormControl>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>Cancel</Button>
-          <Button onClick={handleSubmit}>Submit</Button> {/* Removed disabled={paymentDisabled} for correction */}
+          <Button onClick={handleSubmit}>Submit</Button>
         </DialogActions>
       </Dialog>
       <Snackbar
-        open={comingSoonOpen}
-        autoHideDuration={6000}
-        onClose={handleCloseComingSoon}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert onClose={handleCloseComingSoon} severity="info" sx={{ width: '100%' }}>
-          Coming soon, please use 'Pay On Service' option.
-        </Alert>
-      </Snackbar>
-
-      {/* "Submission Success" Snackbar */}
-      <Snackbar
-        open={responseOpen}
-        autoHideDuration={6000}
-        onClose={handleCloseResponse}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert onClose={handleCloseResponse} severity={submitSuccess ? "success" : "error"} sx={{ width: '100%' }}>
-          {responseMessage}
-        </Alert>
-      </Snackbar>
+         open={responseOpen}
+         autoHideDuration={6000}
+         onClose={handleCloseResponse}
+         message={responseMessage}
+      />
     </Box>
   );
 };

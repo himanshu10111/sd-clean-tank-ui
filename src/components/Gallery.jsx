@@ -11,11 +11,12 @@ import { Carousel } from "react-responsive-carousel";
 // components
 import Title from './Title'
 import Paragraph from './Paragraph'
-import tank1 from '../assets/tank6.jpg';
-import tank2 from '../assets/tank2.jpg';
-import tank3 from '../assets/tank3.jpg';
-import tank4 from '../assets/tank7.jpg';
-import tank5 from '../assets/tank5.jpg';
+import tank1 from '../assets/img1.jpg';
+import tank2 from '../assets/img2.jpg';
+import tank3 from '../assets/img3.jpg';
+import tank4 from '../assets/img4.jpg';
+import tank5 from '../assets/img5.jpg';
+import tank6 from '../assets/img6.jpg';
 
 
 const Gallery = () => {
@@ -42,6 +43,10 @@ const Gallery = () => {
         {
             alt: "image5",
             url: tank5
+        },
+        {
+            alt: "image6",
+            url: tank6
         },
     ];
   

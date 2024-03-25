@@ -87,7 +87,7 @@ const PriceList = () => {
     };
 
 
-    fetch('http://localhost:8000/api/book-slot', {
+    fetch('https://shunham-clean-node.azurewebsites.net/api/book-slot', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

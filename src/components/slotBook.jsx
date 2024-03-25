@@ -34,7 +34,7 @@ const SelectTimeSlot = () => {
   };
 
   const fetchAvailableSlots = (date) => {
-    fetch(`http://localhost:8000/api/available-slots/${date}`)
+    fetch(`https://shunham-clean-node.azurewebsites.net/api/available-slots/${date}`)
       .then(response => {
         if (!response.ok) {
           throw new Error('Network response was not ok');
